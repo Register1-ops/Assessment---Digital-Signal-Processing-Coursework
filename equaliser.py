@@ -17,7 +17,11 @@ def parse_arguments(): # This function is responsible for parsing the command-li
     return parser.parse_args()
 
 
-
+def parse_bands(bands_str): # This function takes the string of comma-separated values provided by the user for the --bands argument and processes it to extract the gain values for each band.
+    values = [float(x)  for x in bands_str.split(",")] # This function takes a string of comma-separated values (representing the gain values for each band) and converts it into a list of floating-point numbers.
+    if len(values) != 11: # Check if the number of values provided is exactly 11, which is the expected number of bands for the equaliser. If not, it raises a ValueError.
+        raise ValueError("Exactly 11 band values must be provided.")
+    return values # Return the list of gain values for the 11 bands.
 
 if __name__ == "__main__":
     args = parse_arguments()
