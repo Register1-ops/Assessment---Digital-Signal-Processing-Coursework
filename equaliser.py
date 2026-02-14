@@ -23,5 +23,29 @@ def parse_bands(bands_str): # This function takes the string of comma-separated 
         raise ValueError("Exactly 11 band values must be provided.")
     return values # Return the list of gain values for the 11 bands.
 
+def db_to_amplitude(db): # This function converts a gain value from decibels (dB) to amplitude. The formula used is: amplitude = 10^(db/20).
+    return 10**(db/20) # This function takes a gain value in decibels (dB) and converts it to amplitude using the formula: amplitude = 10^(db/20). This is a common conversion in audio processing, as it allows us to work with linear amplitude values instead of logarithmic dB values.
+
+def design_peaking_filter(fc, fs, gain_db, Q = 1.0): # This function designs a peaking filter based on the specified center frequency (fc), sampling frequency (fs), gain in decibels (gain_db), and quality factor (Q). It calculates the filter coefficients for the peaking filter and returns them as two arrays: b for the numerator coefficients and a for the denominator coefficients.
+    
+    A = db_to_amplitude(gain_db) #' Convert the gain from decibels to amplitude using the db_to_amplitude function.
+    w0 = 2 * np.pi * ( fc / fs ) # Calculate the normalized angular frequency (w0) for the peaking filter based on the center frequency (fc) and the sampling frequency (fs).
+    alpha  = np.sin(w0) / (2 * Q) # Calculate the alpha parameter for the peaking filter, which is based on the normalized angular frequency (w0) and the quality factor (Q).
+
+    b0 = 1 + alpha * A # Calculate the b0 coefficient for the peaking filter using the gain (A) and the alpha parameter.
+    b1 = -2 * np.cos(w0) # Calculate the b1 coefficient for the peaking filter using the normalized angular frequency (w0).
+    b2 = 1 - alpha * A # Calculate the b2 coefficient for the peaking filter using the gain (A) and the alpha parameter.
+    
+    a0 = 1 + alpha / A # Calculate the a0 coefficient for the peaking filter using the gain (A) and the alpha parameter.
+    a1 = -2 * np.cos(w0) # Calculate the a1 coefficient for the peaking filter using the normalized angular frequency (w0).
+    a2 = 1 - alpha / A # Calculate the a2 coefficient for the peaking filter using the gain (A) and the alpha parameter.
+
+    # Normalize the coefficients by a0 to ensure that the filter has a gain of 1 at the center frequency when the gain is set to 0 dB.
+
+    b = np.array([b0, b1, b2]) / a0 # Normalize the b coefficients by a0.
+    a = np.array([1, a1 / a0, a2 / a0]) # Normalize the a coefficients by a0, and set the first coefficient to 1 for the standard IIR filter representation.
+
+    return b, a # Return the normalized filter coefficients b and a.
+
 if __name__ == "__main__":
     args = parse_arguments()
