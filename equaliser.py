@@ -47,5 +47,33 @@ def design_peaking_filter(fc, fs, gain_db, Q = 1.0): # This function designs a p
 
     return b, a # Return the normalized filter coefficients b and a.
 
+def load_audio(filename):
+    audioData, fs = sf.load(filename) # Load the audio file specified by the filename using the soundfile library. This function returns the audio data as a NumPy array and the sampling frequency (fs) of the audio.
+    if audioData.ndim > 1: # Check if the audio data has more than one channel (i.e., is stereo). If it does, convert it to mono by averaging the channels.
+        audioData = audioData.mean(axis=1) # Convert stereo audio to mono by averaging the channels.
+    return audioData, fs # Return the loaded audio data and the sampling frequency.
+
+def save_audio(filename, audioData, fs):
+    """Save audio files"""
+    sf.write(filename, audioData, fs) # Save the processed audio data to a file specified by the filename using the soundfile library. The audio data is saved with the given sampling frequency (fs).
+    return
+
+def build_equaliser(fs, gains_db): # This function builds the equaliser by designing peaking filters for each of the 11 bands based on the specified sampling frequency (fs) and the gain values in decibels (gains_db). It returns a list of filter coefficients for each band.
+    """
+    Docstring for build_equaliser
+    
+    :param fs: 
+    :param gains_db: 
+    """
+    center_frequencies = [16, 31.5, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000] # Define the center frequencies for the 11 bands of the equaliser.
+    coefficients = [] # Initialize an empty list to store the filter coefficients for each band.
+
+    for fc, gain_db in zip(center_frequencies, gains_db): # Loop through each center frequency and corresponding gain value in decibels, and design a peaking filter for each band using the design_peaking_filter function. The resulting filter coefficients are appended to the coefficients list.
+        if fc >= fs / 2: # Check if the center frequency (fc) is greater than or equal to half of the sampling frequency (fs). If it is, skip designing the filter for that band, as it would not be valid due to the Nyquist frequency limit.
+            continue
+        b, a = design_peaking_filter(fc, fs, gain_db) # Design a peaking filter for the current center frequency (fc) and gain in decibels (gain_db) using the design_peaking_filter function. This function returns the filter coefficients b and a.
+        coefficients.append((b, a)) # Append the filter coefficients (b, a) as a tuple to the coefficients list.
+    return coefficients # Return the list of filter coefficients for each band of the equaliser.
+
 if __name__ == "__main__":
     args = parse_arguments()
