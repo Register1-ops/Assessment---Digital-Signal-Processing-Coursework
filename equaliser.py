@@ -75,5 +75,24 @@ def build_equaliser(fs, gains_db): # This function builds the equaliser by desig
         coefficients.append((b, a)) # Append the filter coefficients (b, a) as a tuple to the coefficients list.
     return coefficients # Return the list of filter coefficients for each band of the equaliser.
 
+
+def iir_filter(x , b, a):
+    """Apply an IIR filter to the input signal x using the filter coefficients b and a."""
+    y = np.zeros_like(x) 
+    for n in range(len(x)):
+        y[n] = b[0]*x[n]
+        if n >=1:
+            y[n] += b[1]*x[n-1] - a[1]*y[n-1]
+        if n >=2:
+            y[n] += b[2]*x[n-2] - a[2]*y[n-2]
+    return y
+
+def apply_cascade_filters(x, coeffs_list):
+    y = x.copy()
+    for b, a in coeffs_list:
+        y = iir_filter(y, b, a)
+    return y
+
+
 if __name__ == "__main__":
     args = parse_arguments()
