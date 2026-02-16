@@ -27,3 +27,13 @@ def load_audio(filename):
         data = data.mean(axis=1) # If the audio data has more than one channel (e.g., stereo), it averages the channels to convert it to mono.
     data = data.astype(np.float32) / 32768.0 # The audio data is then normalized to the range [-1, 1] by dividing it by 32768.0 (the maximum value for 16-bit audio).
     return fs, data # Finally, the function returns the sample rate and the normalized audio data as a tuple.
+
+def save_audio(filename, fs, data):
+    """Save audio data to a WAV file.
+    :param filename: Path to the output WAV file.
+    :param fs: Sample rate of the audio data.
+    :param data: Audio data as a numpy array.
+    """
+    data_int16 = (data * 322768).asytype(np.int16) # The audio data is first scaled back to the range of 16-bit integers by multiplying it by 32768 and then converting it to the int16 data type.
+    wavfile.write(filename, fs, data_int16) # The wavfile.write function from the scipy.io module is used to write the audio data to the specified output WAV file, using the provided sample rate (fs) and the converted audio data (data_int16).
+    return
